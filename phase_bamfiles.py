@@ -6,7 +6,8 @@ import os
 import subprocess as sp
 import pysam
 import time
-
+import gzip
+import vcf
 
 def index_samfile(sam_path):
     status = 0
@@ -91,15 +92,37 @@ def build_paired_lists(sam_paths):
     return True
 
 
+def read_vcf(vcf_file):
+
+    if vcf_file.endswith('.vcf'):
+        input_handle = open(vcf_file)
+    else:
+        return False
+    for line in input_handle:
+        print(line)
+    vcf_reader =  vcf.Reader(input_handle)
+
+    
+    for record in vcf_reader:
+        print (record)
+
+    return input_handle.close()
+
+
+def process_vcfs_paths(vcf_paths):
+    for vcf_path in vcf_paths:
+        read_vcf(vcf_path)
+
 def main():
     sam_dir = "test/bams/crem"
+    vcf_dir = "test/vcfs/crem"
+    vcf_paths = [os.path.join(vcf_dir, i) for i in os.listdir(vcf_dir) if i.endswith(".vcf")]
     sam_paths = [os.path.join(sam_dir, i) for i in os.listdir(sam_dir) if i.endswith(".bam")]
-    index_all(sam_paths)
 
-    build_paired_lists(sam_paths)
-    build_overlap_sequences(sam_paths[-1])
-
-    print(sam_paths[-1])
+    #index_all(sam_paths)
+    #build_paired_lists(sam_paths)
+    #build_overlap_sequences(sam_paths[-1])
+    process_vcfs_paths(vcf_paths)
 
 
 
