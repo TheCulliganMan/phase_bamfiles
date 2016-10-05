@@ -94,24 +94,23 @@ def build_paired_lists(sam_paths):
 
 def read_vcf(vcf_file):
 
-    if vcf_file.endswith('.vcf'):
-        input_handle = open(vcf_file)
-    else:
-        return False
-    for line in input_handle:
-        print(line)
-    vcf_reader =  vcf.Reader(input_handle)
-
-    
-    for record in vcf_reader:
-        print (record)
-
-    return input_handle.close()
+    with open(vcf_file) as input_handle:
+        vcf_reader =  vcf.Reader(input_handle)
+        for record in vcf_reader:
+            yield record
 
 
 def process_vcfs_paths(vcf_paths):
     for vcf_path in vcf_paths:
-        read_vcf(vcf_path)
+        for record in read_vcf(vcf_path):
+            if record.ALT != [None]:
+                print(record)
+        break
+
+def fasta_diff(*fastas):
+    fasta_list = []
+    for fasta in fastas:
+        fasta_list.append(open(fasta))
 
 def main():
     sam_dir = "test/bams/crem"
@@ -119,9 +118,9 @@ def main():
     vcf_paths = [os.path.join(vcf_dir, i) for i in os.listdir(vcf_dir) if i.endswith(".vcf")]
     sam_paths = [os.path.join(sam_dir, i) for i in os.listdir(sam_dir) if i.endswith(".bam")]
 
-    #index_all(sam_paths)
+    index_all(sam_paths)
     #build_paired_lists(sam_paths)
-    #build_overlap_sequences(sam_paths[-1])
+    build_overlap_sequences(sam_paths[-1])
     process_vcfs_paths(vcf_paths)
 
 
